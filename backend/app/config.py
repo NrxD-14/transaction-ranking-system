@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://transaction-ranking-system-chi.vercel.app",
+    "https://transaction-ranking-system-3uhh0i6ci-marvels13.vercel.app",
 ]
     jwt_secret: str = "trs-dev-secret-change-in-production"  # Override via .env in production
     jwt_algorithm: str = "HS256"

@@ -189,9 +189,9 @@ npm run dev:frontend
 npm run dev:backend
 ```
 
-- App URL: `https://transaction-ranking-system-chi.vercel.app/login`
-- API URL: `http://localhost:8000`
-- Swagger Docs: `http://localhost:8000/docs`
+- App URL: `https://transaction-ranking-system-3uhh0ic6i-marvels13.vercel.app/login`
+- API URL: `https://transaction-ranking-system-y6el.onrender.com`
+- Swagger Docs: `https://transaction-ranking-system-y6el.onrender.com/docs`
 
 ---
 
@@ -206,7 +206,7 @@ npm run dev:backend
 | `GET` | `/ranking` | Get live leaderboard standings | Yes (User) |
 | `GET` | `/admin/analytics`| System-wide chart data | Yes (Admin) |
 
-*For a full list of endpoints, visit `http://localhost:8000/docs` after starting the server.*
+*For a full list of endpoints, visit `https://transaction-ranking-system-y6el.onrender.com/docs` after starting the server.*
 
 ---
 
