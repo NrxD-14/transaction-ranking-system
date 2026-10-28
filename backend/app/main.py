@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api import admin, auth, data, ranking, summary, transaction
+from app.api import admin, auth, chat, data, ranking, summary, transaction
 from app.config import settings
 from app.database import Base, SessionLocal, engine, ensure_schema
 from app.services.seed_service import seed_database
@@ -83,6 +83,7 @@ async def generic_exception_handler(_: Request, exc: Exception):
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(transaction.router)
+app.include_router(chat.router)
 app.include_router(summary.router)
 app.include_router(ranking.router)
 app.include_router(data.router)

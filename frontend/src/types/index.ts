@@ -9,6 +9,7 @@ export interface AuthUser {
   userId: string;
   role: 'admin' | 'user';
   avatar: string;
+  profilePicture?: string | null;
   bio?: string | null;
   phone?: string | null;
   location?: string | null;
@@ -19,6 +20,7 @@ export interface UpdateProfilePayload {
   name?: string;
   email?: string;
   avatar?: string;
+  profilePicture?: string | null;
   bio?: string | null;
   phone?: string | null;
   location?: string | null;
@@ -29,6 +31,7 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
+  profilePicture?: string | null;
   joinedAt: string;
   rank: number;
   score: number;
@@ -46,6 +49,7 @@ export interface Transaction {
   userId: string;
   userName: string;
   userAvatar: string;
+  userProfilePicture?: string | null;
   amount: number;
   type: TransactionType;
   date: string;
@@ -54,11 +58,60 @@ export interface Transaction {
   description: string;
 }
 
+export interface TransactionDeletionRequest {
+  id: number;
+  transactionId: string;
+  userId: string;
+  transactionAmount: number;
+  transactionType: TransactionType;
+  transactionDate: string;
+  transactionDescription: string;
+  requesterEmail: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected' | 'deleted';
+  requestedAt: string;
+  respondedAt: string | null;
+  completedAt: string | null;
+  responseNote: string | null;
+}
+
+export interface ChatParticipant {
+  userId: string;
+  name: string;
+  email: string;
+  avatar: string;
+  profilePicture?: string | null;
+  role: 'admin' | 'user';
+  groupChatEnabled: boolean;
+}
+
+export interface ChatMessage {
+  id: number;
+  roomType: 'group' | 'direct';
+  senderUserId: string;
+  senderName: string;
+  senderEmail: string;
+  senderAvatar: string;
+  senderProfilePicture?: string | null;
+  senderRole: 'admin' | 'user';
+  recipientUserId: string | null;
+  recipientName: string | null;
+  content: string;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
+export interface ChatUnreadCounts {
+  groupCount: number;
+  directCounts: Record<string, number>;
+}
+
 export interface Activity {
   id: string;
   userId: string;
   userName: string;
   userAvatar: string;
+  userProfilePicture?: string | null;
   action: string;
   amount?: number;
   time: string;
@@ -116,6 +169,7 @@ export interface AdminUserRow {
   name: string;
   email: string;
   avatar: string;
+  profilePicture?: string | null;
   role: string;
   joinedAt: string;
   transactionCount: number;
@@ -138,6 +192,7 @@ export interface AdminLogDetails {
     email: string;
     role: string;
     avatar: string;
+    profilePicture?: string | null;
     phone: string | null;
     location: string | null;
     bio: string | null;

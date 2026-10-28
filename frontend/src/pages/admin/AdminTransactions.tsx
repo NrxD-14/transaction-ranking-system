@@ -1,18 +1,19 @@
 /** Admin transactions — full history with filters, export, and detail drawer. */
 import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Download, X, Filter } from 'lucide-react';
+import { Search, Download, X, Filter, Trash2 } from 'lucide-react';
 import { Card } from '../../components/Card';
 import { Avatar, Button, StatusBadge, TypeBadge } from '../../components/UI';
 import { Loader } from '../../components/Loader';
 import { Pagination } from '../../components/admin/Pagination';
-import { adminApi } from '../../lib/api';
+import { adminApi, transactionApi } from '../../lib/api';
 import { useAdminPolling } from '../../hooks/useAdminPolling';
-import type { Transaction } from '../../types';
+import type { Transaction, TransactionDeletionRequest } from '../../types';
 import { formatCurrency, formatDateTime } from '../../lib/utils';
 
 export default function AdminTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [deletionRequests, setDeletionRequests] = useState<TransactionDeletionRequest[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -24,11 +25,15 @@ export default function AdminTransactions() {
   const [dateTo, setDateTo] = useState('');
   const [selected, setSelected] = useState<Transaction | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [deletionReason, setDeletionReason] = useState('');
+  const [deletionActionLoading, setDeletionActionLoading] = useState(false);
+  const [deletionError, setDeletionError] = useState('');
   const pageSize = 15;
 
   const load = useCallback(async () => {
     try {
-      const res = await adminApi.getTransactions({
+      const [res, requestRes] = await Promise.all([
+        adminApi.getTransactions({
         search: search || undefined,
         status: status || undefined,
         type: type || undefined,
@@ -36,9 +41,12 @@ export default function AdminTransactions() {
         dateTo: dateTo || undefined,
         page,
         pageSize,
-      });
+        }),
+        transactionApi.getDeletionRequests(),
+      ]);
       setTransactions(res.data.transactions);
       setTotal(res.data.total);
+      setDeletionRequests(requestRes.data.requests);
       setError('');
     } catch {
       setError('Failed to load transactions. Please try again.');
@@ -72,6 +80,41 @@ export default function AdminTransactions() {
   };
 
   const totalPages = Math.ceil(total / pageSize);
+  const selectedRequest = selected
+    ? deletionRequests.find(request => request.transactionId === selected.id && ['pending', 'approved'].includes(request.status))
+    : undefined;
+
+  const submitDeletionRequest = async () => {
+    if (!selected) return;
+    setDeletionActionLoading(true);
+    setDeletionError('');
+    try {
+      await transactionApi.requestDeletion(selected.id, deletionReason.trim());
+      setDeletionReason('');
+      await load();
+    } catch (requestError: unknown) {
+      const message = (requestError as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+      setDeletionError(message ?? 'Could not send the deletion request.');
+    } finally {
+      setDeletionActionLoading(false);
+    }
+  };
+
+  const finalizeDeletion = async () => {
+    if (!selectedRequest || selectedRequest.status !== 'approved') return;
+    setDeletionActionLoading(true);
+    setDeletionError('');
+    try {
+      await transactionApi.deleteApproved(selectedRequest.id);
+      setSelected(null);
+      await load();
+    } catch (requestError: unknown) {
+      const message = (requestError as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+      setDeletionError(message ?? 'Could not delete the approved transaction.');
+    } finally {
+      setDeletionActionLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -137,7 +180,7 @@ export default function AdminTransactions() {
                     <td className="px-4 py-3 font-mono text-xs text-gray-500">{tx.id}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Avatar name={tx.userName} colorClass={tx.userAvatar} size="sm" />
+                        <Avatar name={tx.userName} colorClass={tx.userAvatar} profilePicture={tx.userProfilePicture} size="sm" />
                         <span className="text-gray-900 dark:text-white">{tx.userName}</span>
                       </div>
                     </td>
@@ -173,7 +216,7 @@ export default function AdminTransactions() {
                   <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
                 <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
-                  <Avatar name={selected.userName} colorClass={selected.userAvatar} size="lg" />
+                  <Avatar name={selected.userName} colorClass={selected.userAvatar} profilePicture={selected.userProfilePicture} size="lg" />
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">{selected.userName}</p>
                     <p className="text-xs text-gray-500">{selected.userId}</p>
@@ -200,6 +243,55 @@ export default function AdminTransactions() {
                     <span className="text-xs text-gray-500">Status</span>
                     <StatusBadge status={selected.status} />
                   </div>
+                </div>
+                <div className="mt-6 border-t border-gray-100 dark:border-white/10 pt-5">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Deletion approval</h4>
+                  {selectedRequest ? (
+                    <div className="mt-3 rounded-xl bg-gray-50 dark:bg-white/5 p-3">
+                      <p className="text-xs font-semibold capitalize text-gray-800 dark:text-gray-200">
+                        Request {selectedRequest.status}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{selectedRequest.reason}</p>
+                      {selectedRequest.status === 'approved' && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          loading={deletionActionLoading}
+                          icon={<Trash2 size={13} />}
+                          onClick={() => void finalizeDeletion()}
+                          className="mt-3"
+                        >
+                          Delete approved transaction
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-3">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Send the account owner a request. The transaction remains active unless they approve and an admin completes the deletion.
+                      </p>
+                      <textarea
+                        value={deletionReason}
+                        onChange={event => setDeletionReason(event.target.value)}
+                        maxLength={500}
+                        minLength={5}
+                        rows={3}
+                        placeholder="Explain why deletion is requested (at least 5 characters)"
+                        className="w-full px-3 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/40 resize-none"
+                      />
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        loading={deletionActionLoading}
+                        disabled={deletionReason.trim().length < 5}
+                        icon={<Trash2 size={13} />}
+                        onClick={() => void submitDeletionRequest()}
+                      >
+                        Request deletion approval
+                      </Button>
+                    </div>
+                  )}
+                  {deletionError && <p role="alert" className="mt-2 text-xs text-red-500">{deletionError}</p>}
                 </div>
               </div>
             </motion.div>

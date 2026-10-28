@@ -81,6 +81,7 @@ def build_ranking(db: Session) -> list[RankingUser]:
                 "name": user.name,
                 "email": user.email,
                 "avatar": user.avatar,
+                "profilePicture": user.profile_picture,
                 "joinedAt": user.joined_at,
                 "score": score["total_score"],
                 "totalAmount": round(total_amount, 2),

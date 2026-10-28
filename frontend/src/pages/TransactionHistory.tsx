@@ -1,20 +1,21 @@
 /** Transaction History — filters and displays all transactions from AppContext. */
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Filter, ChevronLeft, ChevronRight, ScrollText } from 'lucide-react';
+import { Download, Filter, ChevronLeft, ChevronRight, ScrollText, Pencil, X } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Loader } from '../components/Loader';
 import { SearchBar } from '../components/SearchBar';
 import { Avatar, TypeBadge, StatusBadge, Button } from '../components/UI';
 import { useApp } from '../context/AppContext';
 import { formatDate, formatCurrency, exportToCsv } from '../lib/utils';
-import type { TransactionType } from '../types';
+import { getApiErrorMessage, transactionApi } from '../lib/api';
+import type { Transaction, TransactionType } from '../types';
 
 const allTypes: (TransactionType | 'all')[] = ['all', 'transfer', 'payment', 'deposit', 'withdrawal', 'refund'];
 const allStatuses = ['all', 'completed', 'pending', 'failed'] as const;
 
 export default function TransactionHistory() {
-  const { transactions, dataLoading } = useApp();
+  const { transactions, dataLoading, authUser, reloadData, addToast } = useApp();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TransactionType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -22,6 +23,13 @@ export default function TransactionHistory() {
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [editing, setEditing] = useState<Transaction | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editType, setEditType] = useState<TransactionType>('transfer');
+  const [editDate, setEditDate] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
   const perPage = 12;
 
   const filtered = useMemo(() => {
@@ -49,6 +57,44 @@ export default function TransactionHistory() {
       ID: tx.id, User: tx.userName, UserID: tx.userId, Amount: tx.amount,
       Type: tx.type, Status: tx.status, Score: tx.score, Date: formatDate(tx.date), Description: tx.description,
     })));
+  };
+
+  const startEditing = (transaction: Transaction) => {
+    setEditing(transaction);
+    setEditAmount(String(transaction.amount));
+    setEditType(transaction.type);
+    setEditDate(transaction.date.slice(0, 10));
+    setEditDescription(transaction.description);
+    setEditError('');
+  };
+
+  const handleEditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editing) return;
+
+    setSavingEdit(true);
+    setEditError('');
+    try {
+      await transactionApi.update(editing.id, {
+        amount: Number(editAmount),
+        type: editType,
+        date: new Date(editDate).toISOString(),
+        description: editDescription,
+      });
+      await reloadData();
+      addToast({
+        type: 'success',
+        title: 'Transaction updated',
+        message: `${editing.id} was updated and resubmitted. Rankings and totals have been recalculated.`,
+      });
+      setEditing(null);
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, 'Could not update transaction');
+      setEditError(message);
+      addToast({ type: 'error', title: 'Update failed', message });
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   const selectClass = "w-full px-3 py-2 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-white/5 focus:outline-none focus:border-violet-400 transition-colors";
@@ -112,7 +158,7 @@ export default function TransactionHistory() {
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="bg-gray-50/80 dark:bg-white/5 border-b border-gray-100 dark:border-white/10">
-                  {['Transaction', 'User', 'Amount', 'Type', 'Status', 'Score', 'Date', 'Description'].map(h => (
+                  {['Transaction', 'User', 'Amount', 'Type', 'Status', 'Score', 'Date', 'Description', 'Action'].map(h => (
                     <th key={h} className="px-4 py-3.5 text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -120,7 +166,7 @@ export default function TransactionHistory() {
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-16 text-center">
+                    <td colSpan={9} className="px-4 py-16 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/10 flex items-center justify-center">
                           <ScrollText size={20} className="text-gray-400 dark:text-gray-500" />
@@ -144,7 +190,7 @@ export default function TransactionHistory() {
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <Avatar name={tx.userName} colorClass={tx.userAvatar} size="sm" />
+                          <Avatar name={tx.userName} colorClass={tx.userAvatar} profilePicture={tx.userProfilePicture} size="sm" />
                           <div>
                             <p className="text-xs font-semibold text-gray-900 dark:text-white">{tx.userName}</p>
                             <p className="text-[10px] text-gray-400 dark:text-gray-500">{tx.userId}</p>
@@ -157,6 +203,18 @@ export default function TransactionHistory() {
                       <td className="px-4 py-3.5"><span className="text-xs font-bold text-violet-600 dark:text-violet-400">{tx.score}</span></td>
                       <td className="px-4 py-3.5 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatDate(tx.date)}</td>
                       <td className="px-4 py-3.5 text-xs text-gray-400 dark:text-gray-500 max-w-[160px] truncate">{tx.description}</td>
+                      <td className="px-4 py-3.5">
+                        {(authUser?.role === 'admin' || authUser?.userId === tx.userId) && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={<Pencil size={12} />}
+                            onClick={() => startEditing(tx)}
+                          >
+                            Edit
+                          </Button>
+                        )}
+                      </td>
                     </motion.tr>
                   ))
                 )}
@@ -190,6 +248,77 @@ export default function TransactionHistory() {
           )}
         </Card>
       </motion.div>
+
+      {editing && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close transaction editor"
+            onClick={() => setEditing(null)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-transaction-title"
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#111827] shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-gray-100 dark:border-white/10">
+              <div>
+                <h2 id="edit-transaction-title" className="text-base font-bold text-gray-900 dark:text-white">Edit transaction</h2>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editing.id} · save to replace the committed values</p>
+              </div>
+              <button type="button" onClick={() => setEditing(null)} aria-label="Close" className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="p-5 space-y-4">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Amount</span>
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  required
+                  value={editAmount}
+                  onChange={event => setEditAmount(event.target.value)}
+                  className={inputClass}
+                />
+              </label>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Type</span>
+                <select value={editType} onChange={event => setEditType(event.target.value as TransactionType)} className={selectClass}>
+                  {allTypes.filter((type): type is TransactionType => type !== 'all').map(type => (
+                    <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Date</span>
+                <input type="date" required value={editDate} onChange={event => setEditDate(event.target.value)} className={inputClass} />
+              </label>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Description</span>
+                <textarea
+                  value={editDescription}
+                  onChange={event => setEditDescription(event.target.value)}
+                  maxLength={255}
+                  rows={3}
+                  className={`${inputClass} resize-none`}
+                />
+              </label>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                Saving replaces the committed transaction values. User ID, transaction ID, and status are kept unchanged.
+              </p>
+              {editError && <p role="alert" className="text-xs text-red-500">{editError}</p>}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>
+                <Button type="submit" loading={savingEdit}>Save and resubmit</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

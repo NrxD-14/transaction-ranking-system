@@ -121,7 +121,7 @@ export default function AdminUsers() {
                     onClick={() => setSelected(user)}
                     className="border-b border-gray-50 dark:border-white/5 hover:bg-violet-50/50 dark:hover:bg-violet-500/5 cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-3"><Avatar name={user.name} colorClass={user.avatar} size="sm" /></td>
+                    <td className="px-4 py-3"><Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} size="sm" /></td>
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{user.name}</td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{user.email}</td>
                     <td className="px-4 py-3">
@@ -159,7 +159,7 @@ export default function AdminUsers() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Avatar name={selected.name} colorClass={selected.avatar} size="lg" />
+                  <Avatar name={selected.name} colorClass={selected.avatar} profilePicture={selected.profilePicture} size="lg" />
                   <div>
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">{selected.name}</h3>
                     <p className="text-xs text-gray-500">{selected.id}</p>

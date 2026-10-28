@@ -25,6 +25,7 @@ def get_transactions(_: Account = Depends(get_current_account), db: Session = De
             userId=tx.user_id,
             userName=tx.user.name,
             userAvatar=tx.user.avatar,
+            userProfilePicture=tx.user.profile_picture,
             amount=tx.amount,
             type=tx.type,
             date=tx.date,

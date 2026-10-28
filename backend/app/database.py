@@ -34,6 +34,10 @@ def ensure_schema() -> None:
             conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(32)"))
         if "location" not in columns:
             conn.execute(text("ALTER TABLE users ADD COLUMN location VARCHAR(120)"))
+        if "group_chat_removed_at" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN group_chat_removed_at DATETIME"))
+        if "profile_picture" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN profile_picture TEXT"))
 
         account_columns = {row[1] for row in conn.execute(text("PRAGMA table_info(accounts)"))}
         if "role" not in account_columns:

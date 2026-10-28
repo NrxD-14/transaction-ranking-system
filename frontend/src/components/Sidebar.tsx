@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, PlusCircle, Trophy, User, ScrollText,
+  LayoutDashboard, PlusCircle, Trophy, User, ScrollText, MessageCircle,
   Settings, ChevronRight, Zap, Moon, Sun, X, Shield
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,7 @@ const navItems = [
   { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
   { path: '/user-summary', icon: User, label: 'User Summary' },
   { path: '/history', icon: ScrollText, label: 'Transaction History' },
+  { path: '/chat', icon: MessageCircle, label: 'Group & Private Chat' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -126,8 +127,10 @@ export function Sidebar() {
 
           {authUser && (
             <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
-              <div className={`w-8 h-8 rounded-full ${authUser.avatar} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
-                {authUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+              <div className={`w-8 h-8 rounded-full ${authUser.profilePicture ? 'bg-gray-700' : authUser.avatar} overflow-hidden flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                {authUser.profilePicture
+                  ? <img src={authUser.profilePicture} alt={`${authUser.name}'s profile`} className="w-full h-full object-cover" />
+                  : authUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-white text-xs font-medium truncate">{authUser.name}</p>

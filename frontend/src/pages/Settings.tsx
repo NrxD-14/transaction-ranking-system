@@ -88,7 +88,7 @@ export default function Settings() {
           {authUser && (
             <>
               <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-100 dark:border-white/10">
-                <Avatar name={authUser.name} colorClass={authUser.avatar} size="lg" />
+                <Avatar name={authUser.name} colorClass={authUser.avatar} profilePicture={authUser.profilePicture} size="lg" />
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{authUser.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{authUser.email}</p>

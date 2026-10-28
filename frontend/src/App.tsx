@@ -30,6 +30,8 @@ const AdminLeaderboard = lazy(() => import('./pages/admin/AdminLeaderboard'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminLogs = lazy(() => import('./pages/admin/AdminLogs'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const AdminNotifications = lazy(() => import('./pages/admin/AdminNotifications'));
+const Chat = lazy(() => import('./pages/Chat'));
 
 function AdminFallback() {
   return (
@@ -50,6 +52,7 @@ function UserRoutes() {
         <Route path="/user-summary" element={<UserSummary />} />
         <Route path="/history" element={<TransactionHistory />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/chat" element={<Suspense fallback={<AdminFallback />}><Chat /></Suspense>} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AnimatePresence>
@@ -93,6 +96,8 @@ export default function App() {
             <Route path="analytics" element={<Suspense fallback={<AdminFallback />}><AdminAnalytics /></Suspense>} />
             <Route path="logs" element={<Suspense fallback={<AdminFallback />}><AdminLogs /></Suspense>} />
             <Route path="settings" element={<Suspense fallback={<AdminFallback />}><AdminSettings /></Suspense>} />
+            <Route path="notifications" element={<Suspense fallback={<AdminFallback />}><AdminNotifications /></Suspense>} />
+            <Route path="chat" element={<Suspense fallback={<AdminFallback />}><Chat /></Suspense>} />
           </Route>
           <Route path="/*" element={<ProtectedRoute><AppContent /></ProtectedRoute>} />
         </Routes>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, Phone, MapPin, FileText, Copy } from 'lucide-react';
+import { X, User, Mail, Phone, MapPin, FileText, Copy, ImagePlus, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Avatar, Button } from './UI';
 import { AVATAR_OPTIONS } from '../constants/avatars';
@@ -17,6 +17,7 @@ export function AccountProfileModal({ open, onClose }: AccountProfileModalProps)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState('');
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [bio, setBio] = useState('');
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
@@ -27,6 +28,7 @@ export function AccountProfileModal({ open, onClose }: AccountProfileModalProps)
     setName(authUser.name);
     setEmail(authUser.email);
     setAvatar(authUser.avatar);
+    setProfilePicture(authUser.profilePicture ?? null);
     setBio(authUser.bio ?? '');
     setPhone(authUser.phone ?? '');
     setLocation(authUser.location ?? '');
@@ -40,6 +42,7 @@ export function AccountProfileModal({ open, onClose }: AccountProfileModalProps)
       name: name.trim(),
       email: email.trim(),
       avatar,
+      profilePicture,
       bio: bio.trim() || null,
       phone: phone.trim() || null,
       location: location.trim() || null,
@@ -70,6 +73,46 @@ export function AccountProfileModal({ open, onClose }: AccountProfileModalProps)
     } catch {
       addToast({ type: 'error', title: 'Copy failed', message: 'Could not copy User ID to clipboard.' });
     }
+  };
+
+  const handleProfilePicture = (file?: File) => {
+    if (!file) return;
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!supportedTypes.includes(file.type)) {
+      addToast({ type: 'error', title: 'Unsupported image', message: 'Choose a PNG, JPEG, or WebP image.' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      addToast({ type: 'error', title: 'Image too large', message: 'Profile pictures must be 2 MB or smaller.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        addToast({ type: 'error', title: 'Image could not be read', message: 'Choose another image and try again.' });
+        return;
+      }
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(1, 256 / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext('2d');
+        if (!context) {
+          addToast({ type: 'error', title: 'Image could not be processed', message: 'Choose another image and try again.' });
+          return;
+        }
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        setProfilePicture(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      image.onerror = () => addToast({ type: 'error', title: 'Image could not be read', message: 'Choose another image and try again.' });
+      image.src = reader.result;
+    };
+    reader.onerror = () => addToast({ type: 'error', title: 'Image could not be read', message: 'Choose another image and try again.' });
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -108,16 +151,42 @@ export function AccountProfileModal({ open, onClose }: AccountProfileModalProps)
 
             <form onSubmit={handleSubmit} className="p-5 space-y-5">
               <div className="flex flex-col items-center gap-4 pb-2">
-                <Avatar name={name || authUser.name} colorClass={avatar} size="xl" />
+                <Avatar name={name || authUser.name} colorClass={avatar} profilePicture={profilePicture} size="xl" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 text-center mb-2">Profile picture</p>
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 text-center mb-2">Choose a profile picture or color</p>
+                  <div className="mb-3 flex justify-center gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700">
+                      <ImagePlus size={14} /> Upload image
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="sr-only"
+                        onChange={event => {
+                          handleProfilePicture(event.target.files?.[0]);
+                          event.target.value = '';
+                        }}
+                      />
+                    </label>
+                    {profilePicture && (
+                      <button
+                        type="button"
+                        onClick={() => setProfilePicture(null)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                      >
+                        <Trash2 size={13} /> Remove photo
+                      </button>
+                    )}
+                  </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {AVATAR_OPTIONS.map((option) => (
                       <button
                         key={option.className}
                         type="button"
                         title={option.label}
-                        onClick={() => setAvatar(option.className)}
+                        onClick={() => {
+                          setAvatar(option.className);
+                          setProfilePicture(null);
+                        }}
                         className={`w-9 h-9 rounded-full ${option.className} transition-transform hover:scale-110 ${
                           avatar === option.className ? 'ring-2 ring-offset-2 ring-violet-500 dark:ring-offset-[#111827]' : ''
                         }`}

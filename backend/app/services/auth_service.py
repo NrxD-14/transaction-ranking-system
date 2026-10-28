@@ -1,4 +1,6 @@
 """Authentication business logic: bcrypt hashing, JWT tokens, signup, and login."""
+import base64
+import binascii
 import bcrypt
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -15,6 +17,46 @@ AVATARS = [
     "bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-rose-500", "bg-amber-500",
     "bg-cyan-500", "bg-pink-500", "bg-teal-500", "bg-orange-500", "bg-indigo-500",
 ]
+MAX_PROFILE_PICTURE_BYTES = 2 * 1024 * 1024
+
+
+def _validate_profile_picture(profile_picture: str) -> None:
+    if not profile_picture:
+        return
+    header, separator, encoded_image = profile_picture.partition(",")
+    allowed_headers = {
+        "data:image/png;base64",
+        "data:image/jpeg;base64",
+        "data:image/webp;base64",
+    }
+    if not separator or header not in allowed_headers:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Profile picture must be a PNG, JPEG, or WebP image",
+        )
+    try:
+        image = base64.b64decode(encoded_image, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Profile picture data is invalid",
+        ) from exc
+    if len(image) > MAX_PROFILE_PICTURE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Profile picture must be 2 MB or smaller",
+        )
+
+    image_signatures = {
+        "data:image/png;base64": image.startswith(b"\x89PNG\r\n\x1a\n"),
+        "data:image/jpeg;base64": image.startswith(b"\xff\xd8\xff"),
+        "data:image/webp;base64": len(image) >= 12 and image[:4] == b"RIFF" and image[8:12] == b"WEBP",
+    }
+    if not image_signatures[header]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The uploaded file does not match its image type",
+        )
 
 
 def hash_password(password: str) -> str:
@@ -119,6 +161,8 @@ def update_profile(
     name: str | None = None,
     email: str | None = None,
     avatar: str | None = None,
+    profile_picture: str | None = None,
+    profile_picture_provided: bool = False,
     bio: str | None = None,
     phone: str | None = None,
     location: str | None = None,
@@ -152,6 +196,13 @@ def update_profile(
                 detail="Invalid avatar selection",
             )
         user.avatar = avatar
+
+    if profile_picture_provided:
+        if profile_picture is None:
+            user.profile_picture = None
+        else:
+            _validate_profile_picture(profile_picture)
+            user.profile_picture = profile_picture or None
 
     if bio is not None:
         user.bio = bio.strip() or None

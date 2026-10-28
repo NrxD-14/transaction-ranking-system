@@ -88,6 +88,7 @@ export default function Dashboard() {
     id: `${tx.id}-${i}`,
     userName: tx.userName,
     userAvatar: tx.userAvatar,
+    userProfilePicture: tx.userProfilePicture,
     action: `${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)} of $${tx.amount.toLocaleString()}`,
     time: tx.date,
     type: tx.type,
@@ -155,7 +156,7 @@ export default function Dashboard() {
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400' : i === 1 ? 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-300' : 'bg-orange-100 dark:bg-orange-500/15 text-orange-500 dark:text-orange-400'}`}>
                   {i + 1}
                 </div>
-                <Avatar name={user.name} colorClass={user.avatar} size="sm" />
+                <Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">{user.transactionCount} transactions</p>
@@ -184,7 +185,7 @@ export default function Dashboard() {
           <div className="space-y-2">
             {recent.map(tx => (
               <motion.div key={tx.id} whileHover={{ x: 1 }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                <Avatar name={tx.userName} colorClass={tx.userAvatar} size="sm" />
+                <Avatar name={tx.userName} colorClass={tx.userAvatar} profilePicture={tx.userProfilePicture} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{tx.userName}</p>
                   <p className="text-[10px] text-gray-400 dark:text-gray-500">{tx.id}</p>
@@ -253,7 +254,7 @@ export default function Dashboard() {
               {activities.slice(0, 8).map((act, i) => (
                 <motion.div key={act.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }} className="flex items-start gap-4 pl-10 relative">
                   <div className="absolute left-2.5 top-2 w-3 h-3 rounded-full bg-violet-500 border-2 border-white dark:border-[#1E293B] shadow-sm" />
-                  <Avatar name={act.userName} colorClass={act.userAvatar} size="sm" />
+                  <Avatar name={act.userName} colorClass={act.userAvatar} profilePicture={act.userProfilePicture} size="sm" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-900 dark:text-gray-100">
                       <span className="font-semibold">{act.userName}</span>

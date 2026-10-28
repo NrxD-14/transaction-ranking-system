@@ -33,7 +33,7 @@ function PodiumCard({ user, position }: { user: User; position: number }) {
       <div className={`w-10 h-10 rounded-xl ${badgeInfo.bg} flex items-center justify-center mb-3`}>
         <Icon size={20} className={badgeInfo.color} />
       </div>
-      <Avatar name={user.name} colorClass={user.avatar} size="lg" />
+      <Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} size="lg" />
       <p className="text-sm font-bold text-white mt-3 text-center leading-tight">{user.name.split(' ')[0]}</p>
       <p className="text-violet-300 text-xs mt-0.5 font-medium">{user.score.toLocaleString()} pts</p>
       <div className={`w-full ${heights[position]} ${position === 0 ? 'bg-gradient-to-t from-violet-600 to-violet-500' : position === 1 ? 'bg-gradient-to-t from-slate-600 to-slate-500' : 'bg-gradient-to-t from-orange-600 to-orange-500'} rounded-t-2xl mt-4 flex items-start justify-center pt-3`}>
@@ -199,7 +199,7 @@ export default function Leaderboard() {
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <Avatar name={user.name} colorClass={user.avatar} size="sm" />
+                        <Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} size="sm" />
                         <div>
                           <p className="text-xs font-semibold text-gray-900 dark:text-white">{user.name}</p>
                           <p className="text-[10px] text-gray-400 dark:text-gray-500">{user.id}</p>

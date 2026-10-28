@@ -22,6 +22,7 @@ class AuthUser(BaseModel):
     userId: str
     role: str = "user"
     avatar: str
+    profilePicture: str | None = None
     bio: str | None = None
     phone: str | None = None
     location: str | None = None
@@ -32,6 +33,7 @@ class UpdateProfileRequest(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=120)
     email: EmailStr | None = None
     avatar: str | None = Field(default=None, max_length=64)
+    profilePicture: str | None = Field(default=None, max_length=2_800_000)
     bio: str | None = Field(default=None, max_length=500)
     phone: str | None = Field(default=None, max_length=32)
     location: str | None = Field(default=None, max_length=120)

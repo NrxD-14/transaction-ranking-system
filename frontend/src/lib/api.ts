@@ -5,7 +5,7 @@
  * - Clears token on 401 responses
  */
 import axios from 'axios';
-import type { AdminLogDetails, AuthUser, Transaction, UpdateProfilePayload, User } from '../types';
+import type { AdminLogDetails, AuthUser, ChatMessage, ChatParticipant, ChatUnreadCounts, Transaction, TransactionDeletionRequest, UpdateProfilePayload, User } from '../types';
 
 const TOKEN_KEY = 'trs-token';
 
@@ -59,6 +59,39 @@ export const transactionApi = {
     description?: string;
     status?: Transaction['status'];
   }) => api.post<Transaction>('/transaction', data),
+  update: (transactionId: string, data: {
+    amount: number;
+    type: Transaction['type'];
+    date: string;
+    description: string;
+  }) => api.patch<Transaction>(`/transaction/${encodeURIComponent(transactionId)}`, data),
+  requestDeletion: (transactionId: string, reason: string) =>
+    api.post<TransactionDeletionRequest>(`/admin/transactions/${encodeURIComponent(transactionId)}/deletion-requests`, { reason }),
+  getDeletionRequests: () =>
+    api.get<{ requests: TransactionDeletionRequest[] }>('/admin/transaction-deletion-requests'),
+  deleteApproved: (requestId: number) =>
+    api.post<{ message: string; request: TransactionDeletionRequest }>(`/admin/transaction-deletion-requests/${requestId}/delete`),
+  getMyDeletionRequests: () =>
+    api.get<{ requests: TransactionDeletionRequest[] }>('/notifications/transaction-deletion-requests'),
+  respondToDeletionRequest: (requestId: number, approved: boolean, note?: string) =>
+    api.patch<TransactionDeletionRequest>(`/notifications/transaction-deletion-requests/${requestId}`, { approved, note }),
+};
+
+export const chatApi = {
+  getParticipants: () => api.get<{ groupChatEnabled: boolean; participants: ChatParticipant[] }>('/chat/participants'),
+  getUnreadCounts: () => api.get<ChatUnreadCounts>('/chat/unread'),
+  markRead: (roomType: 'group' | 'direct', throughMessageId: number, peerUserId?: string) =>
+    api.post('/chat/read', { roomType, throughMessageId, ...(peerUserId ? { peerUserId } : {}) }),
+  getGroupMessages: (beforeId?: number) =>
+    api.get<{ messages: ChatMessage[]; hasMore: boolean }>('/chat/group/messages', { params: beforeId ? { before_id: beforeId } : undefined }),
+  getDirectMessages: (peerUserId: string, beforeId?: number) =>
+    api.get<{ messages: ChatMessage[]; hasMore: boolean }>(`/chat/direct/${encodeURIComponent(peerUserId)}/messages`, { params: beforeId ? { before_id: beforeId } : undefined }),
+  sendMessage: (content: string, recipientUserId?: string) =>
+    api.post<ChatMessage>('/chat/messages', { content, ...(recipientUserId ? { recipientUserId } : {}) }),
+  getAllMessages: (offset = 0) => api.get<{ messages: ChatMessage[]; total: number }>('/admin/chat/messages', { params: { offset } }),
+  deleteMessage: (messageId: number) => api.delete(`/admin/chat/messages/${messageId}`),
+  setGroupAccess: (userId: string, enabled: boolean) =>
+    api.patch<{ userId: string; groupChatEnabled: boolean }>(`/admin/chat/users/${encodeURIComponent(userId)}/group-access`, { enabled }),
 };
 
 export const userApi = {

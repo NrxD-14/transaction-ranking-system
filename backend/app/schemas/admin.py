@@ -25,6 +25,7 @@ class AdminUserRow(BaseModel):
     name: str
     email: str
     avatar: str
+    profilePicture: str | None = None
     role: str
     joinedAt: datetime
     transactionCount: int

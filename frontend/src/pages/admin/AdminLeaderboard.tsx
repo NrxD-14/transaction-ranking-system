@@ -32,7 +32,7 @@ function PodiumCard({ user, position }: { user: User; position: number }) {
       <div className={`w-10 h-10 rounded-xl ${badgeInfo.bg} flex items-center justify-center mb-3`}>
         <Icon size={20} className={badgeInfo.color} />
       </div>
-      <Avatar name={user.name} colorClass={user.avatar} size="lg" />
+      <Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} size="lg" />
       <p className="text-sm font-bold text-white mt-3 text-center">{user.name.split(' ')[0]}</p>
       <p className="text-violet-300 text-xs font-medium">{user.score.toLocaleString()} pts</p>
       <div className={`w-full ${heights[position]} ${position === 0 ? 'bg-gradient-to-t from-violet-600 to-violet-500' : position === 1 ? 'bg-gradient-to-t from-slate-600 to-slate-500' : 'bg-gradient-to-t from-orange-600 to-orange-500'} rounded-t-2xl mt-4 flex items-start justify-center pt-3`}>
@@ -124,7 +124,7 @@ export default function AdminLeaderboard() {
                 className={`p-4 flex items-center gap-4 ${selectedId === user.id ? 'border-violet-400 dark:border-violet-500/50' : ''}`}
               >
                 <span className="w-8 text-center text-sm font-bold text-gray-400">#{user.rank}</span>
-                <Avatar name={user.name} colorClass={user.avatar} />
+                <Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
                   <p className="text-xs text-gray-400">{user.transactionCount} tx · {formatCurrency(user.totalAmount)}</p>

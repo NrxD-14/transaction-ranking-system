@@ -19,6 +19,7 @@ class UserSummary(BaseModel):
     userName: str
     email: str
     avatar: str
+    profilePicture: str | None = None
     rank: int
     totalAmount: float
     transactionCount: int

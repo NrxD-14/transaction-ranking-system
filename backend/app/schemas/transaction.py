@@ -19,6 +19,22 @@ class TransactionCreate(BaseModel):
     status: TransactionStatus = "completed"
 
 
+class TransactionUpdate(BaseModel):
+    amount: float = Field(gt=0)
+    type: TransactionType
+    date: datetime
+    description: str = Field(default="", max_length=255)
+
+
+class TransactionDeletionRequestCreate(BaseModel):
+    reason: str = Field(min_length=5, max_length=500)
+
+
+class TransactionDeletionRequestDecision(BaseModel):
+    approved: bool
+    note: str | None = Field(default=None, max_length=500)
+
+
 class TransactionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -26,6 +42,7 @@ class TransactionResponse(BaseModel):
     userId: str
     userName: str
     userAvatar: str
+    userProfilePicture: str | None = None
     amount: float
     type: TransactionType
     date: datetime

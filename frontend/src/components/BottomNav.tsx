@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Trophy, User, ScrollText } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Trophy, User, ScrollText, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { path: '/new-transaction', icon: PlusCircle, label: 'New' },
   { path: '/user-summary', icon: User, label: 'Users' },
   { path: '/history', icon: ScrollText, label: 'History' },
+  { path: '/chat', icon: MessageCircle, label: 'Chat' },
 ];
 
 export function BottomNav() {

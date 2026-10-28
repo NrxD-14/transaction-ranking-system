@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useLocation } from 'react-router-dom';
 import { AccountMenu } from '../AccountMenu';
+import { ChatUnreadIndicator } from '../ChatUnreadIndicator';
 
 const titles: Record<string, { title: string; subtitle: string }> = {
   '/admin/dashboard': { title: 'Admin Dashboard', subtitle: 'System overview and health metrics' },
@@ -11,6 +12,8 @@ const titles: Record<string, { title: string; subtitle: string }> = {
   '/admin/leaderboard': { title: 'Leaderboard', subtitle: 'Live rankings and score breakdown' },
   '/admin/analytics': { title: 'Analytics', subtitle: 'Revenue, growth, and activity insights' },
   '/admin/logs': { title: 'System Logs', subtitle: 'Audit trail and event history' },
+  '/admin/notifications': { title: 'Notifications', subtitle: 'Deletion request status and user messages' },
+  '/admin/chat': { title: 'Group & Private Chat', subtitle: 'Chat with users and moderate conversations' },
   '/admin/settings': { title: 'Settings', subtitle: 'System configuration and about' },
 };
 
@@ -33,7 +36,10 @@ export function AdminNavbar() {
           <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">{pageInfo.subtitle}</p>
         </div>
       </div>
-      <AccountMenu />
+      <div className="flex items-center gap-2">
+        <ChatUnreadIndicator admin />
+        <AccountMenu />
+      </div>
     </header>
   );
 }

@@ -108,7 +108,7 @@ export default function UserSummary() {
                 >
                   {suggestions.map(user => (
                     <button key={user.id} onMouseDown={() => selectUser(user)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-left">
-                      <Avatar name={user.name} colorClass={user.avatar} size="sm" />
+                      <Avatar name={user.name} colorClass={user.avatar} profilePicture={user.profilePicture} size="sm" />
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
                         <p className="text-xs text-gray-400 dark:text-gray-500">{user.id} · Score: {user.score.toLocaleString()}</p>
@@ -143,7 +143,7 @@ export default function UserSummary() {
               </div>
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-5">
                 <div className="relative">
-                  <Avatar name={selectedUser.name} colorClass={selectedUser.avatar} size="xl" />
+                  <Avatar name={selectedUser.name} colorClass={selectedUser.avatar} profilePicture={selectedUser.profilePicture} size="xl" />
                   <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${selectedUser.badge === 'gold' ? 'bg-amber-400 text-amber-900' : selectedUser.badge === 'silver' ? 'bg-gray-300 text-gray-700' : selectedUser.badge === 'bronze' ? 'bg-orange-400 text-orange-900' : 'bg-violet-500 text-white'}`}>
                     #{selectedUser.rank}
                   </div>

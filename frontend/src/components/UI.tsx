@@ -27,6 +27,7 @@ export function Badge({ children, variant = 'default', size = 'md' }: BadgeProps
 interface AvatarProps {
   name: string;
   colorClass: string;
+  profilePicture?: string | null;
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
@@ -37,11 +38,13 @@ const sizes = {
   xl: 'w-16 h-16 text-base',
 };
 
-export function Avatar({ name, colorClass, size = 'md' }: AvatarProps) {
+export function Avatar({ name, colorClass, profilePicture, size = 'md' }: AvatarProps) {
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <div className={`${sizes[size]} rounded-full ${colorClass} flex items-center justify-center text-white font-bold flex-shrink-0`}>
-      {initials}
+    <div className={`${sizes[size]} rounded-full ${profilePicture ? 'bg-gray-100 dark:bg-white/10' : colorClass} overflow-hidden flex items-center justify-center text-white font-bold flex-shrink-0`}>
+      {profilePicture ? (
+        <img src={profilePicture} alt={`${name}'s profile`} className="w-full h-full object-cover" />
+      ) : initials}
     </div>
   );
 }

@@ -1,8 +1,10 @@
-import { Menu, Bell, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useLocation } from 'react-router-dom';
 import { AccountMenu } from './AccountMenu';
+import { DeletionNotifications } from './DeletionNotifications';
+import { ChatUnreadIndicator } from './ChatUnreadIndicator';
 
 const titles: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Overview of your transaction ecosystem' },
@@ -11,6 +13,7 @@ const titles: Record<string, { title: string; subtitle: string }> = {
   '/user-summary': { title: 'User Summary', subtitle: 'Detailed profile and analytics per user' },
   '/history': { title: 'Transaction History', subtitle: 'Complete log of all transactions' },
   '/settings': { title: 'Settings', subtitle: 'Customize your experience' },
+  '/chat': { title: 'Group & Private Chat', subtitle: 'Connect with users and the admin' },
 };
 
 export function Navbar() {
@@ -44,14 +47,8 @@ export function Navbar() {
           <kbd className="text-[10px] bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded font-mono text-gray-400">⌘K</kbd>
         </motion.button>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-        >
-          <Bell size={18} className="text-gray-600 dark:text-gray-300" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-violet-500 rounded-full" />
-        </motion.button>
+        <ChatUnreadIndicator admin={false} />
+        <DeletionNotifications />
 
         <AccountMenu />
       </div>

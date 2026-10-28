@@ -94,7 +94,7 @@ export default function AdminDashboard() {
             </div>
             {stats.topRankedUser ? (
               <div className="flex items-center gap-3">
-                <Avatar name={stats.topRankedUser.name} colorClass={stats.topRankedUser.avatar} size="lg" />
+                <Avatar name={stats.topRankedUser.name} colorClass={stats.topRankedUser.avatar} profilePicture={stats.topRankedUser.profilePicture} size="lg" />
                 <div>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">{stats.topRankedUser.name}</p>
                   <p className="text-xs text-gray-500">{stats.topRankedUser.score.toLocaleString()} pts · Rank #{stats.topRankedUser.rank}</p>
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
           <div className="space-y-3">
             {stats.recentActivities.map(activity => (
               <div key={activity.id} className="flex items-center gap-3 py-2 border-b border-gray-50 dark:border-white/5 last:border-0">
-                <Avatar name={activity.userName} colorClass={activity.userAvatar} size="sm" />
+                <Avatar name={activity.userName} colorClass={activity.userAvatar} profilePicture={activity.userProfilePicture} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{activity.action}</p>
                   <p className="text-[11px] text-gray-400">{activity.userName} · {formatDistanceToNow(activity.time)}</p>

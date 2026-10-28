@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Users, ScrollText, Trophy, BarChart3,
-  FileText, Settings, ChevronRight, Shield, Moon, Sun, X, ArrowLeft,
+  FileText, Settings, ChevronRight, Shield, Moon, Sun, X, ArrowLeft, MessageCircle, Bell,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
@@ -16,6 +16,8 @@ const navItems = [
   { path: '/admin/leaderboard', icon: Trophy, label: 'Leaderboard' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/admin/logs', icon: FileText, label: 'System Logs' },
+  { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
+  { path: '/admin/chat', icon: MessageCircle, label: 'Group & Private Chat' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -107,8 +109,10 @@ export function AdminSidebar() {
           </button>
           {authUser && (
             <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
-              <div className={`w-8 h-8 rounded-full ${authUser.avatar} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
-                {authUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+              <div className={`w-8 h-8 rounded-full ${authUser.profilePicture ? 'bg-gray-700' : authUser.avatar} overflow-hidden flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                {authUser.profilePicture
+                  ? <img src={authUser.profilePicture} alt={`${authUser.name}'s profile`} className="w-full h-full object-cover" />
+                  : authUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-white text-xs font-medium truncate">{authUser.name}</p>

@@ -214,7 +214,7 @@ export default function AdminLogs() {
                     <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Account details</h3>
                     {details.account ? (
                       <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-gray-50 dark:bg-white/5">
-                        <Avatar name={details.account.name} colorClass={details.account.avatar} size="lg" />
+                        <Avatar name={details.account.name} colorClass={details.account.avatar} profilePicture={details.account.profilePicture} size="lg" />
                         <div className="grid flex-1 grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs">
                           <Detail label="Name" value={details.account.name} />
                           <Detail label="Email" value={details.account.email} />

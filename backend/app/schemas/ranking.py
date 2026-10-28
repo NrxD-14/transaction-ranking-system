@@ -12,6 +12,7 @@ class RankingUser(BaseModel):
     name: str
     email: str
     avatar: str
+    profilePicture: str | None = None
     joinedAt: datetime
     rank: int
     score: int

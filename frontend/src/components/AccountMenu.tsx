@@ -53,7 +53,7 @@ export function AccountMenu() {
           aria-expanded={open}
           aria-haspopup="menu"
         >
-          <Avatar name={authUser.name} colorClass={authUser.avatar} size="sm" />
+          <Avatar name={authUser.name} colorClass={authUser.avatar} profilePicture={authUser.profilePicture} size="sm" />
           <div className="hidden sm:block text-left min-w-0">
             <p className="text-xs font-semibold text-gray-900 dark:text-white truncate max-w-[120px]">{authUser.name}</p>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{authUser.email}</p>
@@ -76,7 +76,7 @@ export function AccountMenu() {
             >
               <div className="px-4 py-4 border-b border-gray-100 dark:border-white/10 bg-gray-50/80 dark:bg-white/5">
                 <div className="flex items-center gap-3">
-                  <Avatar name={authUser.name} colorClass={authUser.avatar} size="md" />
+                  <Avatar name={authUser.name} colorClass={authUser.avatar} profilePicture={authUser.profilePicture} size="md" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{authUser.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{authUser.email}</p>
